@@ -1,0 +1,51 @@
+name: teamvault
+services:
+  volume-init:
+    image: alpine:3.22
+    volumes:
+      - tide-state:/state
+    command: [sh, -c, 'chown -R 1000:1000 /state']
+  tidecloak:
+    image: tideorg/tidecloak-dev:latest
+    container_name: teamvault-tidecloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?Set the operator password in .env}
+    ports:
+      - '127.0.0.1:8080:8080'
+    volumes:
+      - tide-state:/opt/keycloak/data/h2
+    restart: unless-stopped
+    depends_on:
+      volume-init:
+        condition: service_completed_successfully
+  bootstrap:
+    profiles: [setup]
+    build:
+      context: .
+      dockerfile: Dockerfile.bootstrap
+    network_mode: service:tidecloak
+    working_dir: /app
+    env_file: .env
+    environment:
+      TIDECLOAK_URL: http://localhost:8080
+      CLIENT_APP_URL: http://localhost:3000
+      REALM_NAME: ${TIDE_REALM:-teamvault}
+      CLIENT_NAME: teamvault-client
+      BRAND_SKIP: '1'
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./package.json:/app/package.json:ro
+      - ./data:/app/data
+    command: [bash, scripts/init-tidecloak.sh]
+  app:
+    build: .
+    ports:
+      - '127.0.0.1:3000:3000'
+    environment:
+      TEAMVAULT_DB: /app/data/teamvault.sqlite
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+volumes:
+  tide-state:
