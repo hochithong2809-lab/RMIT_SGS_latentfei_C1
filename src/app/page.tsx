@@ -1,13 +1,16 @@
 'use client';
-import { useTideCloak } from '@tidecloak/nextjs';
+import { useTeamAuth } from '@/components/auth-context';
 import { useState } from 'react';
 export default function HomePage() {
-  const { authenticated, login, isInitializing, initError } = useTideCloak();
+  const { mode, accounts, authenticated, login, isInitializing, initError } = useTeamAuth();
   const [error, setError] = useState('');
-  return <main className="landing"><header><a className="brand" href="/"><span className="brand-mark">T</span> TeamVault</a><span className="protected-label">Protected by TideCloak ↗</span></header>
+  const [pending, setPending] = useState<string | null>(null);
+  async function enter(accountId?: string) { setError(''); setPending(accountId || 'tide'); try { await login(accountId); } catch (e) { setError((e as Error).message); setPending(null); } }
+  return <main className="landing"><header><a className="brand" href="/"><span className="brand-mark">T</span> TeamVault</a><span className="protected-label">{mode === 'demo' ? 'TideCloak simulation ↗' : 'Protected by TideCloak ↗'}</span></header>
     <section className="landing-hero"><div><div className="eyebrow">LESS FRICTION. MORE FORWARD.</div><h1>Your next big idea.<br/><em>In the right hands.</em></h1><p>One place to submit your project, get thoughtful feedback, and keep every handoff accountable.</p>
-    {authenticated ? <a className="button" href="/dashboard">Open your workspace ↗</a> : <button disabled={isInitializing} onClick={() => { setError(''); Promise.resolve(login()).catch(e => setError(e.message)); }}>{isInitializing ? 'Connecting…' : 'Enter with TideCloak ↗'}</button>}
-    {(error || initError) && <p role="alert" className="notice error">{error || initError?.message}</p>}<small>Real identities. Clear permissions. Your team’s work stays with your team.</small></div>
+    {authenticated && <a className="button" href="/dashboard">Open your workspace ↗</a>}
+    {mode === 'demo' ? <section className="demo-signin" aria-label="Demo sign-in"><h2>Try a different perspective.</h2><p>Choose a sample account. No Tide account or password needed.</p><div className="demo-accounts">{accounts.map((account, index) => <button key={account.id} disabled={isInitializing || Boolean(pending)} onClick={() => enter(account.id)}><span className={`demo-account-icon tone-${index % 3}`}>{account.name[0]}</span><strong>{account.caption}</strong><small>{account.name}</small><p>{account.description}</p><span className="demo-enter">{pending === account.id ? 'Opening…' : 'Enter workspace ↗'}</span></button>)}</div>{isInitializing && <p>Loading sample accounts…</p>}</section> : !authenticated && <button disabled={isInitializing || Boolean(pending)} onClick={() => enter()}>{isInitializing ? 'Connecting…' : 'Enter with TideCloak ↗'}</button>}
+    {(error || initError) && <p role="alert" className="notice error">{error || initError?.message}</p>}<small>{mode === 'demo' ? 'Sample identities. Real workflow checks. No live Tide authentication.' : 'Real identities. Clear permissions. Your team’s work stays with your team.'}</small></div>
     <div className="hero-visual" aria-hidden="true"><div className="visual-caption">A BETTER WAY TO HAND OFF</div><div className="visual-card"><span className="status approved">READY FOR WHAT’S NEXT</span><h2>From first draft<br/>to shared progress.</h2><div className="progress-line"><i/><i/><i/></div><div className="visual-step">01 Draft <span>02 Review</span> 03 Approved</div><div className="visual-bottom"><span className="mini-shield">✓</span> The right access, at every step.</div></div><span className="visual-note">Built for teams.<br/>Designed around trust.</span></div></section>
     <section className="landing-features">{[['01','Make it yours','Give every project a clear home, with a description and links to the work.'],['02','Share with intention','Your team and assigned reviewers get access. Everyone else stays outside.'],['03','Move forward together','Submit, receive feedback, and track decisions in one clear timeline.']].map(([n,t,d]) => <article key={n}><span>{n}</span><h3>{t}</h3><p>{d}</p></article>)}</section><footer>TEAMVAULT <span>Project handoffs, with trust built in.</span></footer></main>;
 }

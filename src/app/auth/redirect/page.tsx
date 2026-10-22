@@ -2,6 +2,7 @@
 
 import { useAuthCallback } from "@tidecloak/nextjs";
 import { useEffect, useState } from "react";
+import { useTeamAuth } from '@/components/auth-context';
 
 // Post-auth redirect handler (I-16).
 // Processes the OIDC callback, then redirects:
@@ -40,8 +41,9 @@ function RedirectHandler() {
 }
 
 export default function AuthRedirectPage() {
+  const { mode } = useTeamAuth();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => { if (mode === 'demo') window.location.replace('/'); else setMounted(true); }, [mode]);
   if (!mounted) return <p>Loading...</p>;
   return <RedirectHandler />;
 }

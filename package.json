@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:demo": "node scripts/run-demo.mjs dev",
     "build": "next build --webpack",
     "start": "next start",
+    "start:demo": "node scripts/run-demo.mjs start",
     "init": "node scripts/init.mjs",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "test:demo-http": "node tests/demo-http.mjs",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {

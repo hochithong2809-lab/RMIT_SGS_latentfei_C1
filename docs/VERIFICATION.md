@@ -1,5 +1,19 @@
 # Verification record — 22 October 2026
 
+## Current simulation update
+
+The user explicitly authorized simulated TideCloak sign-in and roles. `npm run dev:demo` / `npm run start:demo` run the actual Next.js app with a separate persistent demo SQLite database. It is a workflow simulator, not live Tide authentication.
+
+- TypeScript: passed.
+- Application tests: **25 passed**, including eight demo/session tests in addition to the original 17 access/crypto/persistence tests.
+- Production build: passed on Windows. One sandboxed build encountered Windows EPERM creating a generated directory; the same build completed outside that sandbox.
+- Demo tests cover missing/tampered/expired/revoked sessions, predefined identities, account-switch revocation, cross-origin mutations, member/admin separation, project scope and rejection of demo cookies in Tide mode.
+- Production HTTP integration passed against a dedicated temporary server/database: all four sign-ins, anonymous 401, member/admin 403, cross-team 404, draft privacy, payload tampering, submit/assignment/changes/edit/resubmit, concurrent approval (one 200, one 409), logout revocation, and project/session/audit persistence after restart. Run with `npm run test:demo-http` after building.
+- Browser verified actual demo sign-in as Team Alpha and its two-project dashboard with the simulation banner. This is the running app, not the historical read-only UI fixture.
+- The original real realm licence issue remains unresolved; no real login is claimed by the simulator.
+
+The historical record below describes the original live-mode implementation and its isolated UI fixture, before the simulator was requested.
+
 ## Result
 
 **Implementation is built and tested; real Tide authentication remains externally blocked.** No successful production Tide login or end-to-end four-account workflow is claimed.

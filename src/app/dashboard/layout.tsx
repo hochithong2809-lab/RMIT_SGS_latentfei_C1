@@ -1,6 +1,6 @@
 "use client";
 
-import { useTideCloak } from "@tidecloak/nextjs";
+import { useTeamAuth } from '@/components/auth-context';
 import { useEffect } from "react";
 
 // Playbook: protect-routes-nextjs
@@ -11,13 +11,16 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { authenticated, isInitializing, login } = useTideCloak();
+  const { authenticated, isInitializing, login, mode, initError } = useTeamAuth();
 
   useEffect(() => {
     if (!isInitializing && !authenticated) {
-      login();
+      if (mode === 'demo') window.location.replace('/');
+      else void login();
     }
-  }, [isInitializing, authenticated, login]);
+  }, [isInitializing, authenticated, login, mode]);
+
+  if (initError) return <main className="setup-card"><h1>Unable to open your session.</h1><p>{initError.message}</p><a href="/">Return to sign in</a></main>;
 
   if (isInitializing || !authenticated) {
     return <p>Checking authentication...</p>;

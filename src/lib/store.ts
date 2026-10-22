@@ -2,6 +2,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { authMode } from './auth/mode';
+import { seedDemo } from './auth/demo-data';
 
 export type Role = 'member' | 'reviewer' | 'admin';
 export type Actor = { sub: string; name: string; roles: Role[] };
@@ -199,5 +201,17 @@ export class Store {
   }
 }
 
-let singleton: Store | undefined;
-export function getStore() { return singleton ??= new Store(process.env.TEAMVAULT_DB || './data/teamvault.sqlite'); }
+const stores = new Map<string, Store>();
+export function getStore() {
+  const demo = authMode() === 'demo';
+  const file = demo ? process.env.TEAMVAULT_DEMO_DB || './data/teamvault-demo.sqlite'
+    : process.env.TEAMVAULT_DB || './data/teamvault.sqlite';
+  const key = `${demo ? 'demo' : 'tide'}:${file}`;
+  let store = stores.get(key);
+  if (!store) {
+    store = new Store(file);
+    if (demo) seedDemo(store);
+    stores.set(key, store);
+  }
+  return store;
+}

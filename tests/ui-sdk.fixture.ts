@@ -14,4 +14,4 @@ const secureFetch=async(input:string,options?:RequestInit)=>{
  if(p)return Response.json({submission:p,audit:[{id:1,actor_sub:me.sub,action:'CREATED',detail:'Synthetic project created for UI testing.',at:p.created_at}]});
  return Response.json({error:'Not found'},{status:404});
 };
-export function useTideCloak(){return {secureFetch,token:'ui-fixture-only',logout:async()=>{}};}
+export function useTeamAuth(){return {secureFetch,sessionKey:'ui-fixture-only',mode:'demo',logout:async()=>{}};}

@@ -1,5 +1,13 @@
 # Tide integration provenance
 
+## Session 2 simulation update — 22 October 2026
+
+At the user's explicit request, a clearly labelled local simulator now sits beside the retained live adapter. A fresh JSON-RPC connection to the official endpoint identified `@tideorg/mcp` **1.9.33**. Read-only `tide_choose_playbook`, `tide_playbook(add-rbac-nextjs)` and `tide_playbook(protect-api-nextjs)` calls informed the identity/authorization boundary. No realm or licence was created during this update. See [the current plan](SESSION2-PLAN.md).
+
+The simulator uses predefined server-side accounts and opaque SQLite sessions. These are **not Tide tokens** and provide none of Tide's issuer, VVK, DPoP or governance assurances. Role/team/state rules are exercised through the actual application API. The live adapter remains separate and never automatically falls back to simulation.
+
+## Original live-integration work
+
 The build connected directly to the official Streamable HTTP MCP endpoint `https://mcp.tide.org/mcp` via JSON-RPC, not an unofficial package. `initialize` reported `@tideorg/mcp` **1.9.33**. The following read-only tools were called:
 
 - `tools/list`
